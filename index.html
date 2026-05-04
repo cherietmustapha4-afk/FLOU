@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>FLOU — share life in frames ✨ premium experience</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <!-- Fonts & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="authContainer">
+  <div id="loginView" class="auth-panel">
+    <h2 class="auth-title">flou ✨</h2>
+    <p class="auth-subtitle">Share moments, instantly</p>
+    <input type="email" id="loginEmail" placeholder="Email" class="auth-input">
+    <input type="password" id="loginPassword" placeholder="Password" class="auth-input">
+    <button id="doLoginBtn" class="btn-glow" style="width:100%;">Log in →</button>
+    <p class="auth-switch"><span id="showSignupLink" class="auth-link">✨ Create account</span></p>
+    <p class="auth-switch"><span id="showForgotLink" class="auth-link">Forgot password?</span></p>
+  </div>
+  <div id="signupView" class="auth-panel" style="display:none;">
+    <h3 class="auth-heading">Join flou</h3>
+    <input type="text" id="signupName" placeholder="Full name" class="auth-input">
+    <input type="email" id="signupEmail" placeholder="Email" class="auth-input">
+    <input type="password" id="signupPassword" placeholder="Password" class="auth-input">
+    <button id="doSignupBtn" class="btn-glow" style="width:100%;">Sign up</button>
+    <p class="auth-switch"><span id="backToLoginBtn" class="auth-link">← Back</span></p>
+  </div>
+  <div id="resetView" class="auth-panel" style="display:none;">
+    <h3 class="auth-heading">Reset password</h3>
+    <input type="email" id="resetEmail" placeholder="Your email" class="auth-input">
+    <button id="sendResetBtn" class="btn-glow" style="width:100%;">Send reset link</button>
+    <p class="auth-switch"><span id="backToLoginReset" class="auth-link">Back to login</span></p>
+  </div>
+</div>
+
+<div id="appMain" style="display:none;">
+  <div class="notif-float-btn">
+    <button id="notifIconBtn" class="glass-icon-btn"><i class="far fa-bell"></i><span id="globalNotifBadge" class="badge-notify" style="display:none;">0</span></button>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item" data-route="home"><i class="fas fa-home"></i></button>
+    <button class="nav-item" data-route="friends"><i class="fas fa-user-friends"></i></button>
+    <button class="nav-item" data-route="search"><i class="fas fa-search"></i></button>
+    <button class="nav-item" data-route="messages" id="messagesNavBtn"><i class="fas fa-comment-dots"></i><span id="unreadMessagesBadge" class="msg-badge" style="display: none;">0</span></button>
+    <button class="nav-item" data-route="profile"><i class="fas fa-user"></i></button>
+  </div>
+
+  <div id="homePage" class="page">
+    <div id="homeFeed"></div>
+    <div id="createPostFab" class="fab-create"><i class="fas fa-plus"></i> Post</div>
+  </div>
+  <div id="friendsPage" class="page"><div id="friendsFeed"></div></div>
+  <div id="searchPage" class="page">
+    <input type="text" id="searchInput" placeholder="🔍 Search users..." class="search-input">
+    <div id="searchResults" class="search-results-container"></div>
+  </div>
+  <div id="messagesPage" class="page">
+    <div id="chatUserList" class="chat-user-list"></div>
+    <div id="chatArea" class="glass-card chat-area">
+      <div id="chatMessages" class="chat-messages-list"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Message..." class="chat-text-input">
+        <button id="sendMsgButton" class="btn-glow chat-send"><i class="fas fa-paper-plane"></i></button>
+        <button id="attachImageButton" class="btn-icon-glass"><i class="fas fa-image"></i></button>
+      </div>
+      <input type="file" id="chatImageInput" accept="image/*" style="display:none;">
+    </div>
+  </div>
+  <div id="profilePage" class="page">
+    <div id="profileHeader"></div>
+    <div id="profileStats" class="profile-stats"></div>
+    <div id="profileActions" class="profile-actions-row"></div>
+    <div id="profilePostsGrid" class="profile-posts-grid"></div>
+    <button id="openSettingsBtn" class="glass-full-btn"><i class="fas fa-sliders-h"></i> Settings</button>
+    <button id="logoutProfileBtn" class="logout-outline-btn">Logout</button>
+  </div>
+  <div id="notificationsPage" class="page"><h3 class="page-title">🔔 Notifications</h3><div id="notificationsList"></div></div>
+  <div id="settingsPage" class="page">
+    <h3 class="page-title">⚙️ Settings</h3>
+    <div class="glass-card settings-card">
+      <div class="theme-toggle-row"><span><i class="fas fa-sun"></i> Dark/Light Mode</span><div id="themeToggleSwitch" class="toggle-switch"><div class="toggle-knob"></div></div></div>
+      <div id="settingsAvatarClick" class="avatar-settings-trigger"><img id="settingsAvatar" class="settings-avatar-img"><div><i class="fas fa-camera"></i> Change avatar</div></div>
+      <input type="file" id="avatarUploadInput" accept="image/*" style="display:none;">
+      <label class="settings-label">Display Name</label>
+      <input type="text" id="settingsName" class="settings-input">
+      <button id="updateNameBtn" class="btn-glow settings-full-btn">Update Name</button>
+      <hr class="settings-divider">
+      <button id="settingsResetPwdBtn" class="btn-warning-full">Reset Password</button>
+      <button id="settingsDeleteAccountBtn" class="btn-danger-full">Delete Account</button>
+      <button id="settingsLogoutBtn" class="btn-secondary-full">Logout</button>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
